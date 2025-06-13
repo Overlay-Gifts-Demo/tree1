@@ -45,17 +45,16 @@
     device-orientation-permission-ui="enabled: false"
   >
     <a-assets>
-      <video id="goldRingVideo" src="Pungai Tree Video.mp4" playsinline loop></video>
+      <video id="goldRingVideo" src="Pungai Tree Video.mp4" playsinline webkit-playsinline crossorigin="anonymous"></video>
     </a-assets>
 
-    <!-- Attach camera and screen-fixed video plane -->
     <a-camera position="0 0 0" look-controls="enabled: false">
       <a-entity id="fixedVideoContainer" position="0 0 -2" visible="false">
-        <a-plane id="videoDisplay" width="1.5" height="0.85"></a-plane>
+        <a-plane id="videoDisplay" width="1.5" height="0.85" material="shader: flat"></a-plane>
       </a-entity>
     </a-camera>
 
-    <!-- Marker target just for detection -->
+    <!-- Marker for detection only -->
     <a-entity id="target1" mindar-image-target="targetIndex: 0"></a-entity>
   </a-scene>
 
@@ -70,28 +69,31 @@
     let isPlaying = false;
     let hasBeenScanned = false;
 
+    // Set up video material once
+    videoDisplay.setAttribute('material', 'shader: flat; src: #goldRingVideo');
+
+    // Show the video plane when marker is found, but don't autoplay
     target.addEventListener('targetFound', () => {
       if (!hasBeenScanned) {
-        videoDisplay.setAttribute('material', 'src', '#goldRingVideo');
         fixedVideoContainer.setAttribute('visible', 'true');
-        video.play();
         playPauseButtonContainer.style.display = 'block';
-        playPauseButton.textContent = 'Pause';
-        isPlaying = true;
+        playPauseButton.textContent = 'Play with Audio';
         hasBeenScanned = true;
       }
     });
 
-    // Video remains visible after scan; no targetLost behavior needed
-
     playPauseButton.addEventListener('click', () => {
       if (!hasBeenScanned) return;
+
       if (isPlaying) {
         video.pause();
         playPauseButton.textContent = 'Play with Audio';
       } else {
-        video.play();
-        playPauseButton.textContent = 'Pause';
+        video.play().then(() => {
+          playPauseButton.textContent = 'Pause';
+        }).catch((e) => {
+          console.warn("User interaction required to play video:", e);
+        });
       }
       isPlaying = !isPlaying;
     });
