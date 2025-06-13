@@ -48,17 +48,21 @@
       <video id="goldRingVideo" src="Pungai Tree Video.mp4" playsinline loop></video>
     </a-assets>
 
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <!-- Attach camera and screen-fixed video plane -->
+    <a-camera position="0 0 0" look-controls="enabled: false">
+      <a-entity id="fixedVideoContainer" position="0 0 -2" visible="false">
+        <a-plane id="videoDisplay" width="1.5" height="0.85"></a-plane>
+      </a-entity>
+    </a-camera>
 
-    <a-entity id="target1" mindar-image-target="targetIndex: 0">
-      <!-- Display video on scan -->
-      <a-plane id="videoDisplay" position="0 0 0" width="1" height="0.59"></a-plane>
-    </a-entity>
+    <!-- Marker target just for detection -->
+    <a-entity id="target1" mindar-image-target="targetIndex: 0"></a-entity>
   </a-scene>
 
   <script>
-    const videoDisplay = document.querySelector('#videoDisplay');
     const video = document.querySelector('#goldRingVideo');
+    const videoDisplay = document.querySelector('#videoDisplay');
+    const fixedVideoContainer = document.querySelector('#fixedVideoContainer');
     const playPauseButton = document.querySelector('#playPauseButton');
     const playPauseButtonContainer = document.querySelector('#playPauseButtonContainer');
     const target = document.querySelector('#target1');
@@ -69,6 +73,7 @@
     target.addEventListener('targetFound', () => {
       if (!hasBeenScanned) {
         videoDisplay.setAttribute('material', 'src', '#goldRingVideo');
+        fixedVideoContainer.setAttribute('visible', 'true');
         video.play();
         playPauseButtonContainer.style.display = 'block';
         playPauseButton.textContent = 'Pause';
@@ -77,8 +82,7 @@
       }
     });
 
-    // Do NOT hide the video on target lost
-    // Only disable tracking but keep the video playing
+    // Video remains visible after scan; no targetLost behavior needed
 
     playPauseButton.addEventListener('click', () => {
       if (!hasBeenScanned) return;
