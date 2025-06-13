@@ -44,7 +44,7 @@
   >
     <a-assets>
       <video
-        id="goldRingVideo"
+        id="pungaiVideo"
         src="Pungai Tree Video.mp4"
         preload="auto"
         crossorigin="anonymous"
@@ -71,7 +71,7 @@
   </a-scene>
 
   <script>
-    const video = document.querySelector('#goldRingVideo');
+    const video = document.querySelector('#pungaiVideo');
     const videoDisplay = document.querySelector('#videoDisplay');
     const videoHolder = document.querySelector('#videoHolder');
     const playPauseButton = document.querySelector('#playPauseButton');
@@ -81,9 +81,10 @@
     let hasScanned = false;
     let isPlaying = false;
 
-    // Prepare video material but don't play yet
-    videoDisplay.setAttribute('material', 'shader: flat; src: #goldRingVideo');
+    // Set video as texture on the video plane
+    videoDisplay.setAttribute('material', 'src: #pungaiVideo; shader: flat;');
 
+    // When target is found, reveal video plane and button, but don't autoplay
     target.addEventListener('targetFound', () => {
       if (!hasScanned) {
         videoHolder.setAttribute('visible', 'true');
@@ -92,10 +93,11 @@
       }
     });
 
+    // Play or pause the video on button click
     playPauseButton.addEventListener('click', () => {
       if (!isPlaying) {
         video.play();
-        playPauseButton.textContent = 'Pause';
+        playPauseButton.textContent = 'Pause Video';
         isPlaying = true;
       } else {
         video.pause();
