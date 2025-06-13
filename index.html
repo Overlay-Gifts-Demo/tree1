@@ -43,18 +43,20 @@
     renderer="colorManagement: true, physicallyCorrectLights"
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
+    embedded
   >
     <a-assets>
-      <video id="goldRingVideo" src="Pungai Tree Video.mp4" playsinline webkit-playsinline crossorigin="anonymous"></video>
+      <video id="goldRingVideo" src="Pungai Tree Video.mp4" playsinline crossorigin="anonymous"></video>
     </a-assets>
 
+    <!-- Fixed screen video, always in front of camera -->
     <a-camera position="0 0 0" look-controls="enabled: false">
       <a-entity id="fixedVideoContainer" position="0 0 -2" visible="false">
-        <a-plane id="videoDisplay" width="1.5" height="0.85" material="shader: flat"></a-plane>
+        <a-plane id="videoDisplay" width="1.5" height="0.85" material="shader: flat;"></a-plane>
       </a-entity>
     </a-camera>
 
-    <!-- Marker for detection only -->
+    <!-- Target used for detection only -->
     <a-entity id="target1" mindar-image-target="targetIndex: 0"></a-entity>
   </a-scene>
 
@@ -69,10 +71,10 @@
     let isPlaying = false;
     let hasBeenScanned = false;
 
-    // Set up video material once
+    // Set the video as the material source
     videoDisplay.setAttribute('material', 'shader: flat; src: #goldRingVideo');
 
-    // Show the video plane when marker is found, but don't autoplay
+    // When target is found, show the video and button
     target.addEventListener('targetFound', () => {
       if (!hasBeenScanned) {
         fixedVideoContainer.setAttribute('visible', 'true');
@@ -82,6 +84,7 @@
       }
     });
 
+    // Play/Pause control
     playPauseButton.addEventListener('click', () => {
       if (!hasBeenScanned) return;
 
@@ -91,11 +94,11 @@
       } else {
         video.play().then(() => {
           playPauseButton.textContent = 'Pause';
+          isPlaying = true;
         }).catch((e) => {
-          console.warn("User interaction required to play video:", e);
+          console.warn("Autoplay prevented:", e);
         });
       }
-      isPlaying = !isPlaying;
     });
   </script>
 </body>
