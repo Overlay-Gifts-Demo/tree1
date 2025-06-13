@@ -1,105 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body { margin: 0; overflow: hidden; }
 
-    #playPauseButtonContainer {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      z-index: 999;
-      display: none;
-    }
-
-    #playPauseButton {
-      padding: 10px 20px;
-      background-color: #FFD700;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .a-enter-vr-button {
-      display: none !important;
-    }
-  </style>
-</head>
-<body>
-  <!-- Play/Pause Button -->
-  <div id="playPauseButtonContainer">
-    <button id="playPauseButton">Play with Audio</button>
-  </div>
-
-  <!-- AR Scene -->
-  <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind"
-    color-space="sRGB"
-    renderer="colorManagement: true, physicallyCorrectLights"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    embedded
-  >
-    <a-assets>
-      <video id="goldRingVideo" src="Pungai Tree Video.mp4" playsinline crossorigin="anonymous"></video>
-    </a-assets>
-
-    <!-- Fixed screen video, always in front of camera -->
-    <a-camera position="0 0 0" look-controls="enabled: false">
-      <a-entity id="fixedVideoContainer" position="0 0 -2" visible="false">
-        <a-plane id="videoDisplay" width="1.5" height="0.85" material="shader: flat;"></a-plane>
-      </a-entity>
-    </a-camera>
-
-    <!-- Target used for detection only -->
-    <a-entity id="target1" mindar-image-target="targetIndex: 0"></a-entity>
-  </a-scene>
-
-  <script>
-    const video = document.querySelector('#goldRingVideo');
-    const videoDisplay = document.querySelector('#videoDisplay');
-    const fixedVideoContainer = document.querySelector('#fixedVideoContainer');
-    const playPauseButton = document.querySelector('#playPauseButton');
-    const playPauseButtonContainer = document.querySelector('#playPauseButtonContainer');
-    const target = document.querySelector('#target1');
-
-    let isPlaying = false;
-    let hasBeenScanned = false;
-
-    // Set the video as the material source
-    videoDisplay.setAttribute('material', 'shader: flat; src: #goldRingVideo');
-
-    // When target is found, show the video and button
-    target.addEventListener('targetFound', () => {
-      if (!hasBeenScanned) {
-        fixedVideoContainer.setAttribute('visible', 'true');
-        playPauseButtonContainer.style.display = 'block';
-        playPauseButton.textContent = 'Play with Audio';
-        hasBeenScanned = true;
+      #playPauseButtonContainer {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        display: none;
       }
-    });
 
-    // Play/Pause control
-    playPauseButton.addEventListener('click', () => {
-      if (!hasBeenScanned) return;
+      #playPauseButton {
+        padding: 10px 20px;
+        background-color: #FFD700;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Play/Pause Button -->
+    <div id="playPauseButtonContainer">
+      <button id="playPauseButton">Play</button>
+    </div>
 
-      if (isPlaying) {
-        video.pause();
-        playPauseButton.textContent = 'Play with Audio';
-      } else {
-        video.play().then(() => {
+    <!-- AR Scene -->
+    <a-scene
+      mindar-image="imageTargetSrc: ./targets.mind"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+      embedded
+    >
+      <a-assets>
+        <video
+          id="goldRingVideo"
+          src="Pungai Tree Video.mp4"
+          preload="auto"
+          crossorigin="anonymous"
+          playsinline
+        ></video>
+      </a-assets>
+
+      <!-- This camera holds the fixed video display -->
+      <a-camera>
+        <a-entity id="videoHolder" position="0 0 -2" visible="false">
+          <a-plane
+            id="videoDisplay"
+            width="1.5"
+            height="0.85"
+            material="shader: flat;"
+          ></a-plane>
+        </a-entity>
+      </a-camera>
+
+      <!-- Marker (used just for detection) -->
+      <a-entity id="target1" mindar-image-target="targetIndex: 0"></a-entity>
+    </a-scene>
+
+    <script>
+      const video = document.querySelector('#goldRingVideo');
+      const videoDisplay = document.querySelector('#videoDisplay');
+      const videoHolder = document.querySelector('#videoHolder');
+      const playPauseButton = document.querySelector('#playPauseButton');
+      const playPauseButtonContainer = document.querySelector('#playPauseButtonContainer');
+      const target = document.querySelector('#target1');
+
+      let hasScanned = false;
+      let isPlaying = false;
+
+      // Attach video texture
+      videoDisplay.setAttribute('material', 'shader: flat; src: #goldRingVideo');
+
+      // When target is found, reveal video plane and show button
+      target.addEventListener('targetFound', () => {
+        if (!hasScanned) {
+          videoHolder.setAttribute('visible', 'true');
+          playPauseButtonContainer.style.display = 'block';
+          hasScanned = true;
+        }
+      });
+
+      // Handle play/pause button
+      playPauseButton.addEventListener('click', () => {
+        if (!hasScanned) return;
+
+        if (isPlaying) {
+          video.pause();
+          playPauseButton.textContent = 'Play';
+        } else {
+          video.play();
           playPauseButton.textContent = 'Pause';
-          isPlaying = true;
-        }).catch((e) => {
-          console.warn("Autoplay prevented:", e);
-        });
-      }
-    });
-  </script>
-</body>
+        }
+
+        isPlaying = !isPlaying;
+      });
+    </script>
+  </body>
 </html>
