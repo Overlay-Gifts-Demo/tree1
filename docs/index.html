@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/css/style.css">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <style>
     body { margin: 0; overflow: hidden; }
-
     #playPauseButtonContainer {
       position: absolute;
       bottom: 20px;
@@ -14,7 +14,6 @@
       z-index: 999;
       display: none;
     }
-
     #playPauseButton {
       padding: 10px 20px;
       background-color: #FFD700;
@@ -28,14 +27,12 @@
 </head>
 <body>
 
-  <!-- Play Button -->
   <div id="playPauseButtonContainer">
     <button id="playPauseButton">Play Video</button>
   </div>
 
-  <!-- AR Scene -->
   <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind"
+    mindar-image="imageTargetSrc: targets.mind"
     color-space="sRGB"
     renderer="colorManagement: true, physicallyCorrectLights"
     vr-mode-ui="enabled: false"
@@ -44,19 +41,21 @@
   >
     <a-assets>
       <video
-        id="pungaiVideo"
-        src="Pungai Tree Video.mp4"
+        id="goldRingVideo"
+        src="pungai-tree-video.mp4"
         preload="auto"
         crossorigin="anonymous"
         playsinline
         webkit-playsinline
         loop
+        muted
       ></video>
     </a-assets>
 
-    <!-- Fixed camera and video display -->
-    <a-camera>
-      <a-entity id="videoHolder" position="0 0 -2" visible="false">
+    <a-camera></a-camera>
+
+    <a-entity id="target1" mindar-image-target="targetIndex: 0">
+      <a-entity id="videoHolder" position="0 0 0" visible="false">
         <a-plane
           id="videoDisplay"
           width="1.5"
@@ -64,14 +63,11 @@
           material="shader: flat;"
         ></a-plane>
       </a-entity>
-    </a-camera>
-
-    <!-- Marker for detection -->
-    <a-entity id="target1" mindar-image-target="targetIndex: 0"></a-entity>
+    </a-entity>
   </a-scene>
 
   <script>
-    const video = document.querySelector('#pungaiVideo');
+    const video = document.querySelector('#goldRingVideo');
     const videoDisplay = document.querySelector('#videoDisplay');
     const videoHolder = document.querySelector('#videoHolder');
     const playPauseButton = document.querySelector('#playPauseButton');
@@ -81,10 +77,8 @@
     let hasScanned = false;
     let isPlaying = false;
 
-    // Set video as texture on the video plane
-    videoDisplay.setAttribute('material', 'src: #pungaiVideo; shader: flat;');
+    videoDisplay.setAttribute('material', 'shader: flat; src: #goldRingVideo');
 
-    // When target is found, reveal video plane and button, but don't autoplay
     target.addEventListener('targetFound', () => {
       if (!hasScanned) {
         videoHolder.setAttribute('visible', 'true');
@@ -93,11 +87,10 @@
       }
     });
 
-    // Play or pause the video on button click
     playPauseButton.addEventListener('click', () => {
       if (!isPlaying) {
         video.play();
-        playPauseButton.textContent = 'Pause Video';
+        playPauseButton.textContent = 'Pause';
         isPlaying = true;
       } else {
         video.pause();
