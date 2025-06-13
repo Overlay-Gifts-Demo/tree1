@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+
+    #playPauseButtonContainer {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      display: none;
+    }
+
+    #playPauseButton {
+      padding: 10px 20px;
+      background-color: #FFD700;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .a-enter-vr-button {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Play/Pause Button -->
+  <div id="playPauseButtonContainer">
+    <button id="playPauseButton">Play with Audio</button>
+  </div>
+
+  <!-- AR Scene -->
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind"
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
+    <a-assets>
+      <video id="goldRingVideo" src="gold rings.mp4" playsinline loop></video>
+      <img id="logoImage" src="4k.png" />
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity id="target1" mindar-image-target="targetIndex: 0">
+      <a-image src="#logoImage" position="0 .45 0" width="0.9" height="0.35"></a-image>
+      <a-plane id="videoDisplay" position="0 0 0" width="1" height="0.59"></a-plane>
+    </a-entity>
+  </a-scene>
+
+  <script>
+    const videoDisplay = document.querySelector('#videoDisplay');
+    const video = document.querySelector('#goldRingVideo');
+    const playPauseButton = document.querySelector('#playPauseButton');
+    const playPauseButtonContainer = document.querySelector('#playPauseButtonContainer');
+    const target = document.querySelector('#target1');
+
+    let isPlaying = false;
+    let targetVisible = false;
+
+    target.addEventListener('targetFound', () => {
+      targetVisible = true;
+      playPauseButtonContainer.style.display = 'block';
+      videoDisplay.setAttribute('material', 'src', '#goldRingVideo');
+    });
+
+    target.addEventListener('targetLost', () => {
+      targetVisible = false;
+      video.pause();
+      isPlaying = false;
+      playPauseButton.textContent = 'Play with Audio';
+      playPauseButtonContainer.style.display = 'none';
+    });
+
+    playPauseButton.addEventListener('click', () => {
+      if (!targetVisible) return;
+      if (isPlaying) {
+        video.pause();
+        playPauseButton.textContent = 'Play with Audio';
+      } else {
+        video.play();
+        playPauseButton.textContent = 'Pause';
+      }
+      isPlaying = !isPlaying;
+    });
+  </script>
+</body>
+</html>
